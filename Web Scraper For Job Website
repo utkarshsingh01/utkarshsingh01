@@ -1,0 +1,52 @@
+from bs4 import BeautifulSoup
+import requests
+import time
+
+
+def find_jobs():
+
+    # Base url
+    html_text = requests.get("https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords=python&txtLocation=").text
+
+    # Beautifies the html
+    soup = BeautifulSoup(html_text, 'lxml')
+
+    # Finds a job
+    jobs = soup.find_all('li', class_="clearfix job-bx wht-shd-bx")
+
+    unfamiliar_skill = input("Enter some skills  you are not familiar with, separated by single space\n>> ")
+    print(f"Filtering out {unfamiliar_skill}")
+
+    for job in jobs:
+
+        # Finds the published date from the site
+        publish_date = job.find('span', class_='sim-posted').text
+
+        # Validates if the post is not recent
+        if "few" in publish_date:
+            # Finds the company name from job
+            company_name = job.find('h3', class_='joblist-comp-name').text.replace(" ", "")
+
+            # Finds the skill required from job
+            skills = job.find('span', class_='srp-skills').text.replace(" ", "")
+            more_info = job.header.h2.a['href']
+
+            # Filters out unfamiliar skill
+            if unfamiliar_skill not in skills:
+
+                # Prints the result
+                print(f'\nCompany Name: {company_name.strip()} \nRequired Skills: {skills.strip()}\n'
+                      f'More Info: {more_info.strip()}\n')
+
+
+if __name__ == '__main__':
+
+    while True:
+
+        find_jobs()
+
+        time_wait = 10
+
+        print(f"Waiting {time_wait} Minutes...")
+
+        time.sleep(time_wait * 60)
